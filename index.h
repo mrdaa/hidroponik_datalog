@@ -55,50 +55,86 @@ const char MAIN_page[] PROGMEM = R"=====(
   </div>
 
   <script>
-    var Tvalues = [];
-    var Hvalues = [];
-    var timeStamp = [];
-    var Tdsvalues = [];
-    var Wlvalues = [];
+    // var Tvalues = [];
+    // var Hvalues = [];
+    // var timeStamp = [];
+    // var Tdsvalues = [];
+    // var Wlvalues = [];
     // var R1values = [];
     // var R2values = [];
+   
+    const ip = "";
+    const url = ip+"/readsensor"
 
     setInterval(function () {
       getData();
     }, 1000);
 
+    const pushTables = (data)=>{
+          //Update Data Table
+          const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+
+          //buat row baru
+          const newRow = table.insertRow();
+
+          //buat cell baru
+          const TimeCell = newRow.insertCell();
+          const TempCell = newRow.insertCell();
+          const HumCell = newRow.insertCell();
+          const TDSCell = newRow.insertCell();
+          const WLCell = newRow.insertCell();
+
+         //membuat text element
+         const time = document.createTextNode(data.time);
+         const temp = document.createTextNode(data.temp);
+         const hum = document.createTextNode(data.hum);
+         const tds = document.createTextNode(data.tds);
+         const wl = document.createTextNode(data.wl);
+
+         //memasukan text kedalam cell
+         TimeCell.appendChild(time);
+         TempCell.appendChild(temp);
+         HumCell.appendChild(hum);
+         TDSCell.appendChild(tds);
+         WLCell.appendChild(wl);
+    }
+
     function getData() {
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-          var time = new Date().toLocaleTimeString();
           var txt = this.responseText;
           var obj = JSON.parse(txt);
-          Tvalues.push(obj.Temperature);
-          Hvalues.push(obj.Humidity);
-          Tdsvalues.push(obj.Tds);
-          Wlvalues.push(obj.WL);
-          timeStamp.push(time);
+          // Tvalues.push(obj.Temperature);
+          // Hvalues.push(obj.Humidity);
+          // Tdsvalues.push(obj.Tds);
+          // Wlvalues.push(obj.WL);
+          // timeStamp.push(time);
 
-          //Update Data Table
-          var table = document.getElementById("dataTable");
-          var row = table.insertRow(1); //Add after headings
-          var cell1 = row.insertCell(0);
-          var cell2 = row.insertCell(1);
-          var cell3 = row.insertCell(2);
-          var cell4 = row.insertCell(3);
-          var cell5 = row.insertCell(4);
-
-          cell1.innerHTML = time;
-          cell2.innerHTML = obj.Temperature;
-          cell3.innerHTML = obj.Humidity;
-          cell4.innerHTML = obj.Tds;
-          cell5.innerHTML = obj.WL;
+         pushTables({
+           time:new Date().toLocaleTimeString(),
+           temp:obj.Temperature || "--", //artinya jika obj.Temperature kosong nilai nya default jadi "--"
+           hum:obj.Humidity || "--",
+           tds:obj.Tds || "--",
+           wl:obj.WL
+         })
 
         }
       };
       xhttp.open("GET", "readSensor", true);
       xhttp.send();
+    }
+    
+    const getDataVersiFetch = async ()=>{
+       const res = await fetch(url).catch((err)=>console.log("terjadi error", err));
+       const obj = await res.json();
+        pushTables({
+          time:new Date().toLocaleTimeString(),
+          temp:obj.Temperature || "--", //artinya jika obj.Temperature kosong nilai nya default jadi "--"
+          hum:obj.Humidity || "--",
+          tds:obj.Tds || "--",
+          wl:obj.WL
+        })
     }
 
   </script>
